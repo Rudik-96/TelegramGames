@@ -1,5 +1,6 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useTelegram} from "../../hooks/useTelegram";
+import {useFetcher} from "react-router-dom";
 
 const Form = () => {
 
@@ -19,6 +20,23 @@ const Form = () => {
         setSubject(e.target.value)
     }
 
+    const onSendData = useCallback(() => {
+        const data = {
+            country,
+            street,
+            subject,
+        }
+        tg.sendData(JSON.stringify(data))
+    }, [])
+
+    useEffect(() => {
+        tg.onEvent('mainButtonClicked', onSendData);
+
+        return () => {
+            tg.offEvent('mainButtonClicked', onSendData);
+        }
+    }, []);
+
     useEffect(() => {
         tg.MainButton.setParams({
             text: 'send data'
@@ -26,11 +44,11 @@ const Form = () => {
     }, []);
 
     useEffect(() => {
-       if (!street || !country) {
-           tg.MainButton.hide();
-       }else  {
-           tg.MainButton.show();
-       }
+        if (!street || !country) {
+            tg.MainButton.hide();
+        } else {
+            tg.MainButton.show();
+        }
     }, [street, country]);
 
     return (
